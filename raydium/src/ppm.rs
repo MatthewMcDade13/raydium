@@ -44,9 +44,9 @@ impl Image {
 
         for p in self.data.iter() {
             let pix = format!("{} {} {}\n", 
-                p.x() as i32, 
-                p.y() as i32,
-                p.z() as i32
+                (p.x() * 255.999) as i32, 
+                (p.y() * 255.999) as i32,
+                (p.z() * 255.999) as i32
             );
             s.push_str(&pix);
         }
