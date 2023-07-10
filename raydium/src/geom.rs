@@ -1,64 +1,6 @@
-use crate::{ray::Ray, vec::Vec3};
+use crate::{ray::{Ray, Hittable, HitRecord}, vec::Vec3};
+use std::f32;
 
-#[derive(Debug, Clone)]
-pub enum NormalFace {
-    FrontOuter, BackInner
-}
-
-
-#[derive(Debug, Clone)]
-pub struct HitRecord {
-    pub point: Vec3,
-    pub normal: Vec3,
-    pub t: f64,
-    pub normal_face: NormalFace
-}
-
-impl HitRecord {
-    pub fn new(point: Vec3, normal: Vec3, t: f64) -> Self {
-        Self {
-            point, normal, t,
-            normal_face: NormalFace::FrontOuter
-        }/*  */
-    }
-
-    pub fn new_out_norm(point: Vec3, normal: Vec3, t: f64) -> Self {
-        let mut s = Self::new(point, normal, t);
-        s.set_face_normal(ray::Ray::new(point, normal), outward_normal(&s));
-        Self {
-            point, normal, t,
-            normal_face: NormalFace::BackInner
-        }
-    }
-
-    pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: Vec3) {
-        let dprod = Vec3::dot(&ray.direction, &outward_normal);
-        self.normal_face = if dprod < 0.0 { 
-            NormalFace::FrontOuter 
-        } else {
-            NormalFace::BackInner
-        };
-        self.normal = match self.normal_face {
-            NormalFace::FrontOuter => outward_normal,
-            NormalFace::BackInner => -outward_normal
-        };
-    }
-}
-
-impl Default for HitRecord {
-    fn default() -> Self {
-        Self { 
-            point: Vec3::default(), 
-            normal: Vec3::default(), 
-            t: f64::default(), 
-            normal_face: NormalFace::FrontOuter 
-        }
-    }
-}
-
-pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
-}
 
 #[derive(Debug, Clone, Default)]
 pub struct Sphere {
@@ -68,6 +10,7 @@ pub struct Sphere {
 
 impl Sphere {
     pub fn new(center: Vec3, radius: f64) -> Self {
+        let p = f32::consts::PI;
         Self { center, radius }
     }
 }
