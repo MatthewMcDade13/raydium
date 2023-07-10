@@ -1,5 +1,6 @@
 use std::io::Write;
 
+use ray::Ray;
 use world::Camera;
 
 use crate::vec::Vec3;
@@ -9,10 +10,11 @@ mod math;
 mod vec;
 mod ppm;
 mod world;
+mod geom;
 
-const IMAGE_WIDTH: u32 = 256;
-const IMAGE_HEIGHT: u32 = 256;
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
+const IMAGE_WIDTH: u32 = 400;
+const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
     
 
 fn main() -> std::io::Result<()> {

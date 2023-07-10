@@ -12,7 +12,7 @@ pub struct Image {
 
 impl Image {
     pub fn new(width: u32, height: u32) -> Self {
-        Self::with_col_row(width, height, height, width)
+        Self::with_col_row(width, height, width, height)
     }
 
     pub fn with_col_row(width: u32, height: u32, ncols: u32, nrows: u32) -> Self {
