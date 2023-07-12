@@ -1,4 +1,4 @@
-use crate::vec::{Vec3, Color};
+use crate::{vec::{Vec3, Color}, surface::Surface};
 use std::io::Write;
 
 pub struct Image {
@@ -11,6 +11,8 @@ pub struct Image {
 }
 
 impl Image {
+
+
     pub fn new(width: u32, height: u32) -> Self {
         Self::with_col_row(width, height, width, height)
     }
@@ -27,7 +29,7 @@ impl Image {
     pub const fn ncols(&self) -> u32 { self.ncols }
     pub const fn nrows(&self) -> u32 { self.nrows }
 
-    pub fn push(&mut self, color: Color) {
+-    pub fn push(&mut self, color: Color) {
         self.data.push(color);
     }
 
@@ -54,6 +56,8 @@ impl Image {
         file.write_all(s.as_bytes())?;
         Ok(())
     }
+
+    
 }
 
 
