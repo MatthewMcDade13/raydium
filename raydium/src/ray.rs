@@ -85,7 +85,7 @@ pub trait Hittable {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct HitList<T>(pub Vec<T>) where T: Hittable;
+pub struct HitList<T>(pub Vec<Box<T>>) where T: Hittable + ?Sized;
 impl<T> HitList<T> where T: Hittable {
     pub fn new() -> Self {
         Self(Vec::new())

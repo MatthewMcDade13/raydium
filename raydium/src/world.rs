@@ -1,4 +1,4 @@
-use crate::{vec::Vec3, ray::Ray};
+use crate::{vec::Vec3, ray::{Ray, HitList, Hittable}};
 
 
 pub struct Camera {
@@ -44,4 +44,13 @@ impl Camera {
         Ray::new(self.origin, direction)        
     }
 
+}
+
+
+
+pub struct World {
+    cam: Camera,
+    /// pixel buffer
+    objects: HitList<dyn Hittable>,
+    
 }

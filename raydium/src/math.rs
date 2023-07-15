@@ -22,3 +22,8 @@ pub fn clamp<T: std::cmp::Ord>(val: T, minv: T, maxv: T) -> T {
     use std::cmp;
     cmp::min(cmp::max(val, minv), maxv)
 }
+
+#[inline]
+pub fn ftou8(val: f64) -> u8 {
+    (val * 255.999).round() as u8
+}
