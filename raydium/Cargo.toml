@@ -6,9 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+image = "0.24.6"
 log = "0.4.19"
-pixels = "0.13.0"
 rand = "0.8.5"
-winit = "0.28.6"
-winit_input_helper = "0.14.1"
+sdl2 = "0.35.2"
 
