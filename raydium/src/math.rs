@@ -1,4 +1,4 @@
-pub type IOResult<T> = std::io::Result<T>;
+pub type IOResult<T> = Result<T, Box<dyn std::error::Error>>;
 
 pub const INF: f64 = std::f64::INFINITY;
 pub const PI: f64 = 3.1415926535897932384626433832795;
@@ -26,4 +26,9 @@ pub fn clamp<T: std::cmp::Ord>(val: T, minv: T, maxv: T) -> T {
 #[inline]
 pub fn ftou8(val: f64) -> u8 {
     (val * 255.999).round() as u8
+}
+
+pub struct RectSize {
+    pub width: u32,
+    pub height: u32,
 }

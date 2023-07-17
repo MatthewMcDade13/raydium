@@ -16,7 +16,7 @@ impl Ray {
         self.origin + self.direction.mul_scalar(t)
     }
 
-    pub fn color<T: Hittable>(&self, world: HitList<T>) -> Vec3 {
+    pub fn color<T: Hittable>(&self, world: &HitList<T>) -> Vec3 {
         if let Some(hit) = world.hit(self, 0.0, f64::INFINITY) {
             (hit.normal + Color::WHITE).mul_scalar(0.5)
         } else {
@@ -85,7 +85,7 @@ pub trait Hittable {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct HitList<T>(pub Vec<Box<T>>) where T: Hittable + ?Sized;
+pub struct HitList<T>(pub Vec<Box<T>>) where T: Hittable;
 impl<T> HitList<T> where T: Hittable {
     pub fn new() -> Self {
         Self(Vec::new())

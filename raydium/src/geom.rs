@@ -1,4 +1,6 @@
-use crate::{ray::{Ray, Hittable, HitRecord}, vec::Vec3};
+use sdl2::{render::Texture, rect::Rect};
+
+use crate::{ray::{Ray, Hittable, HitRecord}, vec::Vec3, render::Drawable, math::IOResult};
 use std::f32;
 
 
@@ -43,5 +45,30 @@ impl Hittable for Sphere {
         let mut hitrec = HitRecord::new(point, outward_normal, t);
         hitrec.set_face_normal(ray, outward_normal);
         Some(hitrec)        
+    }
+}
+
+pub struct SdlTexture<'a> {
+    texture: Texture<'a>,
+    pub rect: Rect,
+}
+
+impl<'a> SdlTexture<'a> {
+    pub fn new(texture: Texture<'a>, rect: Rect) -> Self {
+        Self { texture, rect }
+    }
+
+    pub fn copy(&mut self, bytes: &[u8], pitch: usize) -> IOResult<()> {
+        if let Err(e) = self.texture.update(None, bytes, pitch) {
+            Err(format!("SdlTexture::copy -- Failed to update texture: {:?}", e).into())
+        } else {
+            Ok(())
+        }
+    }
+}
+
+impl<'a> Drawable for SdlTexture<'a> {
+    fn draw(&self, renderer: &crate::render::Renderer) {
+        renderer.draw_texture(&self.texture, &self.rect);
     }
 }
