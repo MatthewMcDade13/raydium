@@ -1,4 +1,4 @@
-use crate::{vec::Vec3, ray::{Ray, HitList, Hittable}};
+use crate::{vec::Vec3, ray::Ray};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
@@ -35,7 +35,7 @@ impl Camera {
         }
     }
 
-    pub fn cast_ray_at(&self, u: f64, v: f64) -> Ray {
+    pub fn cast_ray(&self, u: f64, v: f64) -> Ray {
         let direction = self.bottom_left 
             + self.horizontal.mul_scalar(u)
             + self.vertical.mul_scalar(v)

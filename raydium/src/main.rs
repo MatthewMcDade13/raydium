@@ -1,20 +1,14 @@
 extern crate sdl2;
 
-use std::borrow::BorrowMut;
-use std::io::Write;
-use image::{ImageBuffer, DynamicImage, EncodableLayout};
-use math::{ftou8, RectSize};
-use ray::{Ray, Hittable};
+use image::{EncodableLayout};
+use math::{RectSize};
 use render::{RadWindow, Renderer, Drawable};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use world::Camera;
 
 use crate::{vec::Vec3, ray::HitList};
 use crate::geom::Sphere;
-use log::error;
 
 mod ray;
 mod math;
@@ -35,7 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let window = RadWindow::build_new(IMAGE_WIDTH, IMAGE_HEIGHT, "Raydium")?;
     let cam = Camera::new(ASPECT_RATIO, 2.0, 1.0);
-    let mut renderer = Renderer::new(window, cam);
+    let renderer = Renderer::new(window, cam);
 
     /**********************************************
      * 
