@@ -1,22 +1,31 @@
-use sdl2::{render::Texture, rect::Rect};
+use sdl2::{rect::Rect, render::Texture};
 
-use crate::{ray::{Ray, Hittable, HitRecord}, vec::Vec3, render::Drawable, math::IOResult};
-use std::f32;
+use crate::{
+    material::Material,
+    math::IOResult,
+    ray::{HitRecord, Hittable, Ray},
+    render::Drawable,
+    vec::Vec3,
+};
+use std::{f32, rc::Rc, sync::Arc};
 
-
-#[derive(Debug, Clone, Default)]
+#[derive(Clone)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
+    pub material: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self {
+    pub fn new(material: Arc<dyn Material>, center: Vec3, radius: f64) -> Self {
         let p = f32::consts::PI;
-        Self { center, radius }
+        Self {
+            center,
+            radius,
+            material,
+        }
     }
 }
-
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
@@ -25,8 +34,10 @@ impl Hittable for Sphere {
         let half_b = Vec3::dot(&oc, &ray.direction);
         let c = oc.len_sq() - self.radius * self.radius;
 
-        let discriminant = half_b*half_b - a*c;
-        if discriminant < 0.0 { return None; }
+        let discriminant = half_b * half_b - a * c;
+        if discriminant < 0.0 {
+            return None;
+        }
 
         let sqrtd = discriminant.sqrt();
 
@@ -42,9 +53,9 @@ impl Hittable for Sphere {
         let t = root;
         let point = ray.at(t);
         let outward_normal = (point - self.center).div_scalar(self.radius);
-        let mut hitrec = HitRecord::new(point, outward_normal, t);
+        let mut hitrec = HitRecord::new(point, outward_normal, t, self.material.clone());
         hitrec.set_face_normal(ray, outward_normal);
-        Some(hitrec)        
+        Some(hitrec)
     }
 }
 

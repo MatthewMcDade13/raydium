@@ -2,10 +2,12 @@ use std::{
     borrow::BorrowMut,
     cell::{Ref, RefCell, RefMut},
     rc::Rc,
+    time::Instant,
 };
 
 use image::{DynamicImage, ImageBuffer, Rgb, RgbImage};
-use rand::Rng;
+use rand::{Rng, SeedableRng};
+use rayon::prelude::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 use sdl2::{
     event::Event,
     keyboard::Keycode,
@@ -137,7 +139,7 @@ impl Renderer {
 
     // TODO :: This shit slow. Make it concurrent/multithreaded
     // TODO :: Put this in World with the Drawable trait
-    pub fn render_world_to_image<T: Hittable>(
+    pub fn render_world_to_image<T: Hittable + Send + Sync>(
         &self,
         world: &HitList<T>,
         size: RectSize,
@@ -150,34 +152,18 @@ impl Renderer {
             .as_mut_rgb8()
             .expect("Failed to convert image to rgb8");
 
-        let mut rng = rand::thread_rng();
-
-        for (x, y, pixel) in buffer.enumerate_pixels_mut() {
-            print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-            println!(
-                "Scanlines Remaining: {}\n{}%",
-                height - 1 - y,
-                y as f64 / (height - 1) as f64 * 100.0
+        {
+            let start = Instant::now();
+            println!("Start render");
+            draw_frame_parallel(
+                buffer,
+                &self.camera,
+                &world,
+                Self::DEFAULT_NUM_SAMPLES,
+                scatter_depth,
+                size,
             );
-            // let u = (x as f64) / (width - 1) as f64;
-            // let v = (y as f64) / (height - 1) as f64;
-            let color = {
-                let mut color = Vec3::zero();
-
-                for n in 0..Self::DEFAULT_NUM_SAMPLES - 1 {
-                    let u = (x as f64 + rng.gen::<f64>()) / (width - 1) as f64;
-                    let v = (y as f64 + rng.gen::<f64>()) / (height - 1) as f64;
-
-                    let ray = self.camera.cast_ray(u, v);
-                    color = color + ray.color(world.clone(), scatter_depth);
-                }
-                color
-            };
-
-            write_color(pixel, &color, Self::DEFAULT_NUM_SAMPLES)
-            // pixel[0] = (ray.color(world.clone()).x() * 255.999) as u8;
-            // pixel[1] = (ray.color(world.clone()).y() * 255.999) as u8;
-            // pixel[2] = (ray.color(world.clone()).z() * 255.999) as u8;
+            println!("End render: Elapsed: {:.2?}", start.elapsed());
         }
 
         if let Some(image) = image.flipv().as_rgb8() {
@@ -190,6 +176,38 @@ impl Renderer {
     pub fn draw<T: Drawable>(&self, drawable: &T) {
         drawable.draw(self);
     }
+}
+
+fn draw_frame_parallel<T: Hittable + Sync + Send>(
+    buffer: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    camera: &Camera,
+    world: &HitList<T>,
+    num_samples: u32,
+    scatter_depth: u32,
+    size: RectSize,
+) {
+    let RectSize { width, height } = size;
+
+    buffer
+        .enumerate_pixels_mut()
+        .par_bridge()
+        .for_each(|(x, y, pixel)| {
+            let mut rng = rand::thread_rng();
+            let color = {
+                let mut color = Vec3::zero();
+
+                for _ in 0..num_samples - 1 {
+                    let u = (x as f64 + rng.gen::<f64>()) / (width - 1) as f64;
+                    let v = (y as f64 + rng.gen::<f64>()) / (height - 1) as f64;
+
+                    let ray = camera.cast_ray(u, v);
+                    color = color + ray.color(world.clone(), scatter_depth);
+                }
+                color
+            };
+
+            write_color(pixel, &color, num_samples);
+        });
 }
 
 fn write_color(pixel: &mut Rgb<u8>, color: &Vec3, samples_per_pixel: u32) {

@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 
 type Vec3_X = f64;
 type Vec3_Y = f64;
@@ -15,7 +15,7 @@ impl Vec3 {
     }
 
     pub fn new_rand_range(min: f64, max: f64) -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rngs::StdRng::from_entropy();
         let range = min..max;
 
         Self(
@@ -23,6 +23,10 @@ impl Vec3 {
             rng.gen_range(range.clone()),
             rng.gen_range(range.clone()),
         )
+    }
+
+    pub fn new_rand_unit_vector() -> Self {
+        Self::new_rand_unit_sphere().normalize()
     }
 
     pub fn new_rand_unit_sphere() -> Self {
@@ -84,6 +88,11 @@ impl Vec3 {
 
     pub fn normalize(&self) -> Self {
         self.div_scalar(self.len())
+    }
+
+    pub fn is_near_zero(&self) -> bool {
+        const EPSILON: f64 = 1e-8;
+        self.x().abs() < EPSILON && self.y().abs() < EPSILON && self.z().abs() < EPSILON
     }
 }
 

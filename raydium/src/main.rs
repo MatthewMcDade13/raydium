@@ -1,7 +1,12 @@
 extern crate sdl2;
 
+use std::rc::Rc;
+use std::sync::Arc;
+
 use image::EncodableLayout;
+use material::{Lambertian, Material, Metal};
 use math::RectSize;
+use ray::Hittable;
 use render::{Drawable, RadWindow, Renderer};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -11,6 +16,7 @@ use crate::geom::Sphere;
 use crate::{ray::HitList, vec::Vec3};
 
 mod geom;
+mod material;
 mod math;
 mod ppm;
 mod ray;
@@ -35,12 +41,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
      */
 
     let mut world = HitList::new();
+
+    let mat_ground = Arc::new(Lambertian::new(Vec3(0.8, 0.8, 0.0)));
+    let mat_center = Arc::new(Lambertian::new(Vec3(0.7, 0.3, 0.3)));
+    let mat_left = Arc::new(Metal::new(Vec3(0.8, 0.8, 0.8)));
+    let mat_right = Arc::new(Metal::new(Vec3(0.8, 0.6, 0.2)));
+
+    world.0.push(Arc::new(Sphere::new(
+        mat_ground,
+        Vec3(0.0, -100.5, -1.0),
+        100.0,
+    )));
     world
         .0
-        .push(Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5)));
+        .push(Arc::new(Sphere::new(mat_center, Vec3(0.0, 0.0, -1.0), 0.5)));
     world
         .0
-        .push(Box::new(Sphere::new(Vec3(0.0, -100.5, -1.0), 100.0)));
+        .push(Arc::new(Sphere::new(mat_left, Vec3(-1.0, 0.0, -1.0), 0.5)));
+    world
+        .0
+        .push(Arc::new(Sphere::new(mat_right, Vec3(1.0, 0.0, -1.0), 0.5)));
+    // world
+    //     .0
+    //     .push(Box::new(Sphere::new(Vec3(0.0, 0.0, -1.0), 0.5)));
+    // world
+    //     .0
+    //     .push(Box::new(Sphere::new(Vec3(0.0, -100.5, -1.0), 100.0)));
 
     let image = renderer.render_world_to_image(
         &world,

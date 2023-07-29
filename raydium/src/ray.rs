@@ -1,4 +1,7 @@
+use std::{rc::Rc, sync::Arc};
+
 use crate::{
+    material::{Material, ScatterResult},
     vec::{Color, Vec3},
     world::Camera,
 };
@@ -17,14 +20,19 @@ impl Ray {
         self.origin + self.direction.mul_scalar(t)
     }
 
-    pub fn color<T: Hittable>(&self, world: &HitList<T>, depth: u32) -> Vec3 {
+    pub fn color<T: Hittable + Send + Sync>(&self, world: &HitList<T>, depth: u32) -> Vec3 {
         if depth <= 0 {
             return Vec3::zero();
         }
 
         if let Some(hit) = world.hit(self, 0.001, f64::INFINITY) {
-            let target = hit.point + hit.normal + Vec3::new_rand_unit_sphere();
-            Ray::color(&Ray::new(hit.point, target - hit.point), &world, depth - 1).mul_scalar(0.5)
+            if let Some(sr) = hit.material.scatter(self, &hit) {
+                sr.attenuation * sr.scattered.color(world, depth - 1)
+            } else {
+                Vec3::zero()
+            }
+            // let target = hit.point + hit.normal + Vec3::new_rand_unit_sphere();
+            // Ray::color(&Ray::new(hit.point, target - hit.point), &world, depth - 1).mul_scalar(0.5)
             //(hit.normal + Color::WHITE).mul_scalar(0.5)
         } else {
             let dir = self.direction.normalize();
@@ -40,26 +48,34 @@ pub enum NormalFace {
     BackInner,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct HitRecord {
     pub point: Vec3,
     pub normal: Vec3,
     pub t: f64,
     pub normal_face: NormalFace,
+    pub material: Arc<dyn Material>,
 }
 
 impl HitRecord {
-    pub fn new(point: Vec3, normal: Vec3, t: f64) -> Self {
+    pub fn new(point: Vec3, normal: Vec3, t: f64, material: Arc<dyn Material>) -> Self {
         Self {
             point,
             normal,
             t,
             normal_face: NormalFace::FrontOuter,
+            material,
         }
     }
 
-    pub fn from_ray(ray: &Ray, point: Vec3, normal: Vec3, t: f64) -> Self {
-        let mut s = Self::new(point, normal, t);
+    pub fn from_ray(
+        ray: &Ray,
+        point: Vec3,
+        normal: Vec3,
+        t: f64,
+        material: Arc<dyn Material>,
+    ) -> Self {
+        let mut s = Self::new(point, normal, t, material);
         s.set_face_normal(ray, normal);
         s
     }
@@ -78,28 +94,29 @@ impl HitRecord {
     }
 }
 
-impl Default for HitRecord {
-    fn default() -> Self {
-        Self {
-            point: Vec3::default(),
-            normal: Vec3::default(),
-            t: f64::default(),
-            normal_face: NormalFace::FrontOuter,
-        }
-    }
-}
+// impl Default for HitRecord {
+//     fn default() -> Self {
+//         Self {
+//             point: Vec3::default(),
+//             normal: Vec3::default(),
+//             t: f64::default(),
+//             normal_face: NormalFace::FrontOuter,
+//             material: Rc::default(),
+//         }
+//     }
+// }
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct HitList<T>(pub Vec<Box<T>>)
+pub struct HitList<T: Hittable + Send + Sync>(pub Vec<Arc<T>>)
 where
     T: Hittable;
 impl<T> HitList<T>
 where
-    T: Hittable,
+    T: Hittable + Send + Sync,
 {
     pub fn new() -> Self {
         Self(Vec::new())
@@ -108,7 +125,7 @@ where
 
 impl<T> Hittable for HitList<T>
 where
-    T: Hittable,
+    T: Hittable + Send + Sync,
 {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut closest = t_max;
