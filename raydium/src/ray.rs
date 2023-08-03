@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc};
+use std::{ops::Neg, rc::Rc, sync::Arc};
 
 use crate::{
     material::{Material, ScatterResult},
@@ -6,6 +6,7 @@ use crate::{
     world::Camera,
 };
 
+#[derive(Debug, Copy, Clone)]
 pub struct Ray {
     pub origin: Vec3,
     pub direction: Vec3,
@@ -89,7 +90,7 @@ impl HitRecord {
         };
         self.normal = match self.normal_face {
             NormalFace::FrontOuter => outward_normal,
-            NormalFace::BackInner => -outward_normal,
+            NormalFace::BackInner => outward_normal.neg(),
         };
     }
 }

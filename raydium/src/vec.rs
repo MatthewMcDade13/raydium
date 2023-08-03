@@ -66,6 +66,10 @@ impl Vec3 {
         self.2
     }
 
+    pub fn add_scalar(&self, s: f64) -> Self {
+        Self(self.x() + s, self.y() + s, self.z() + s)
+    }
+
     pub fn mul_scalar(&self, s: f64) -> Self {
         Self(self.x() * s, self.y() * s, self.z() * s)
     }
