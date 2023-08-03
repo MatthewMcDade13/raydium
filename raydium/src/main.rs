@@ -33,7 +33,13 @@ const MAX_SCATTER_DEPTH: u32 = 50;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let window = RadWindow::build_new(IMAGE_WIDTH, IMAGE_HEIGHT, "Raydium")?;
-    let cam = Camera::new(ASPECT_RATIO, 2.0, 1.0);
+    let cam = Camera::new(
+        Vec3(-2.0, 2.0, 1.0),
+        Vec3(0.0, 0.0, -1.0),
+        Vec3(0.0, 1.0, 0.0),
+        20.0,
+        ASPECT_RATIO,
+    );
     let renderer = Renderer::new(window, cam);
 
     /**********************************************
