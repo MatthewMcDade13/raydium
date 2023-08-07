@@ -79,7 +79,7 @@ impl<'a> SdlTexture<'a> {
 }
 
 impl<'a> Drawable for SdlTexture<'a> {
-    fn draw(&self, renderer: &crate::render::Renderer) {
+    fn draw(&self, renderer: &crate::render::SdlRenderer) {
         renderer.draw_texture(&self.texture, &self.rect);
     }
 }

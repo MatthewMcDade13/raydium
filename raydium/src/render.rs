@@ -27,20 +27,20 @@ use crate::{
     world::Camera,
 };
 
-pub struct RadWindow {
+pub struct SdlWindow {
     ctx: Sdl,
     video: VideoSubsystem,
     canvas: RefCell<Canvas<sdl2::video::Window>>,
     event_pump: RefCell<sdl2::EventPump>,
 }
 
-pub struct Renderer {
-    window: RadWindow,
+pub struct SdlRenderer {
+    window: SdlWindow,
     camera: Camera,
     texture_creator: Rc<TextureCreator<sdl2::video::WindowContext>>,
 }
 
-impl RadWindow {
+impl SdlWindow {
     pub fn build_new(
         width: u32,
         height: u32,
@@ -59,7 +59,7 @@ impl RadWindow {
         canvas.set_draw_color(Color::BLACK);
         canvas.clear();
         canvas.present();
-        Ok(RadWindow {
+        Ok(SdlWindow {
             ctx: sdl.clone(),
             video,
             canvas: RefCell::new(canvas),
@@ -75,10 +75,10 @@ impl RadWindow {
     }
 }
 
-impl Renderer {
+impl SdlRenderer {
     const DEFAULT_NUM_SAMPLES: u32 = 100;
 
-    pub fn new(window: RadWindow, camera: Camera) -> Self {
+    pub fn new(window: SdlWindow, camera: Camera) -> Self {
         let c = {
             let c = window.canvas.borrow();
             let tc = Rc::new(c.texture_creator());
@@ -92,7 +92,7 @@ impl Renderer {
         }
     }
 
-    pub const fn radwindow(&self) -> &RadWindow {
+    pub const fn radwindow(&self) -> &SdlWindow {
         &self.window
     }
     pub fn canvas(&self) -> Ref<Canvas<sdl2::video::Window>> {
@@ -101,7 +101,7 @@ impl Renderer {
     pub fn canvas_mut(&self) -> RefMut<Canvas<sdl2::video::Window>> {
         self.window.canvas.borrow_mut()
     }
-    pub const fn window(&self) -> &RadWindow {
+    pub const fn window(&self) -> &SdlWindow {
         &self.window
     }
 
@@ -221,5 +221,5 @@ fn write_color(pixel: &mut Rgb<u8>, color: &Vec3, samples_per_pixel: u32) {
 }
 
 pub trait Drawable {
-    fn draw(&self, renderer: &Renderer);
+    fn draw(&self, renderer: &SdlRenderer);
 }

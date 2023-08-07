@@ -3,11 +3,12 @@ extern crate sdl2;
 use std::rc::Rc;
 use std::sync::Arc;
 
+use anyhow::Result;
 use image::EncodableLayout;
 use material::{Dielectric, Lambertian, Material, Metal};
 use math::RectSize;
 use ray::Hittable;
-use render::{Drawable, RadWindow, Renderer};
+use render::{Drawable, SdlWindow, SdlRenderer};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use world::Camera;
@@ -31,8 +32,45 @@ const MAX_SCATTER_DEPTH: u32 = 50;
 
 // TODO :: Overall Cleanup
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let window = RadWindow::build_new(IMAGE_WIDTH, IMAGE_HEIGHT, "Raydium")?;
+use eframe::egui;
+fn main() -> anyhow::Result<()> {
+    env_logger::init();
+    let options = eframe::NativeOptions {
+        initial_window_size: Some(egui::vec2(IMAGE_WIDTH as f32, IMAGE_HEIGHT as f32)),
+        ..Default::default()
+    };
+    let _ = eframe::run_native(
+        "Raydium",
+        options,
+        Box::new(|_cc| Box::<Raydium>::default()),
+    );
+    Ok(())
+}
+
+struct Raydium;
+
+impl Default for Raydium {
+    fn default() -> Self {
+        Raydium
+    }
+}
+
+impl eframe::App for Raydium {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        egui::CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Raydium test gui");
+            ui.horizontal(|ui| {
+                let name_label = ui.label("Ayyyeee lmao");
+            });
+            if ui.button("Click me").clicked() {
+                ui.label("Clicked!!!");
+            }
+        });
+    }
+}
+
+fn _main() -> Result<(), Box<dyn std::error::Error>> {
+    let window = SdlWindow::build_new(IMAGE_WIDTH, IMAGE_HEIGHT, "Raydium")?;
     let cam = Camera::new(
         Vec3(-2.0, 2.0, 1.0),
         Vec3(0.0, 0.0, -1.0),
@@ -40,7 +78,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         20.0,
         ASPECT_RATIO,
     );
-    let renderer = Renderer::new(window, cam);
+    let renderer = SdlRenderer::new(window, cam);
 
     /**********************************************
      *
