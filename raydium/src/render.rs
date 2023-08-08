@@ -79,6 +79,9 @@ impl RayRenderer {
 
            image.flipv().as_rgba8().expect("Failed to convert image to rgb8").clone()
         }
+
+        pub const fn camera(&self) -> &Camera { &self.camera }
+        pub const fn num_samples(&self) -> u32 { self.num_samples }
 }
 
 

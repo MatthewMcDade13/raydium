@@ -162,6 +162,9 @@ impl Raydium {
                     self.render_rx = Some(receiver);
                 }     
             }
+
+            ui.label(format!("{:?}", self.renderer.this.camera()));
+            ui.label(format!("{:?}", self.renderer.this)); 
         });
     }
 
