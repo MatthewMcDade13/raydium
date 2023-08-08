@@ -1,13 +1,9 @@
-use sdl2::{rect::Rect, render::Texture};
 
-use crate::{
-    material::Material,
-    math::IOResult,
-    ray::{HitRecord, Hittable, Ray},
-    render::Drawable,
-    vec::Vec3,
-};
+
+
 use std::{f32, rc::Rc, sync::Arc};
+
+use crate::{ray::{HitRecord, Ray, Hittable}, vec::Vec3, material::Material};
 
 #[derive(Clone)]
 pub struct Sphere {
@@ -59,27 +55,3 @@ impl Hittable for Sphere {
     }
 }
 
-pub struct SdlTexture<'a> {
-    texture: Texture<'a>,
-    pub rect: Rect,
-}
-
-impl<'a> SdlTexture<'a> {
-    pub fn new(texture: Texture<'a>, rect: Rect) -> Self {
-        Self { texture, rect }
-    }
-
-    pub fn copy(&mut self, bytes: &[u8], pitch: usize) -> IOResult<()> {
-        if let Err(e) = self.texture.update(None, bytes, pitch) {
-            Err(format!("SdlTexture::copy -- Failed to update texture: {:?}", e).into())
-        } else {
-            Ok(())
-        }
-    }
-}
-
-impl<'a> Drawable for SdlTexture<'a> {
-    fn draw(&self, renderer: &crate::render::SdlRenderer) {
-        renderer.draw_texture(&self.texture, &self.rect);
-    }
-}

@@ -31,6 +31,7 @@ pub fn ftou8(val: f64) -> u8 {
     (val * 255.999).round() as u8
 }
 
+#[derive(Copy, Clone, Default, Debug)]
 pub struct RectSize {
     pub width: u32,
     pub height: u32,
