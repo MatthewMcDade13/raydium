@@ -40,6 +40,18 @@ impl Vec3 {
         }
     }
 
+    pub fn new_rand_in_unit_disk() -> Self {
+        let mut rng = rand::rngs::StdRng::from_entropy();
+        loop {
+            let p = Vec3(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0), 0.0);
+            if p.len_sq() < 1.0 {
+                break p;
+            } else {
+                continue;
+            }
+        }
+    }
+
     pub const fn zero() -> Self {
         Self(0.0, 0.0, 0.0)
     }
