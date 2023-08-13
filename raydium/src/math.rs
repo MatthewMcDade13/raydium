@@ -1,4 +1,6 @@
-use rand::{rngs::ThreadRng, Rng};
+use rand::{rngs::ThreadRng, Rng, SeedableRng};
+
+use crate::vec::Vec3;
 
 pub type IOResult<T> = Result<T, Box<dyn std::error::Error>>;
 
@@ -9,12 +11,15 @@ pub const DEG_TO_RAD: f64 = 0.017453292519943295769236907684886;
 pub const RAD_TO_DEG: f64 = 57.295779513082320876798154814105;
 pub const EULER: f64 = 2.718281828459045235360287471352;
 
+#[inline]
+pub fn radians(deg: f64) -> f64 {
+    deg * DEG_TO_RAD
+}
 
 #[inline]
-pub fn radians(deg: f64) -> f64 { deg * DEG_TO_RAD }
-
-#[inline]
-pub fn degrees(rad: f64) -> f64 { rad * RAD_TO_DEG }
+pub fn degrees(rad: f64) -> f64 {
+    rad * RAD_TO_DEG
+}
 
 #[inline]
 pub const fn index_as_2d<T>(v: &[T], width: usize, x: usize, y: usize) -> &T {
@@ -24,7 +29,6 @@ pub const fn index_as_2d<T>(v: &[T], width: usize, x: usize, y: usize) -> &T {
 pub fn clamp(val: f64, minv: f64, maxv: f64) -> f64 {
     f64::min(f64::max(val, minv), maxv)
 }
-
 
 #[inline]
 pub fn ftou8(val: f64) -> u8 {
